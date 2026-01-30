@@ -14,7 +14,15 @@ A modern React application for managing employees, featuring a full authenticati
   - Dynamic dropdowns for **Department** and **Position**.
 - **State Management**: Uses Redux Toolkit for global state (Auth and Employees).
 - **Protected UI**: Pages are automatically restricted based on login status.
-- **Styling**: Built with Tailwind CSS for a modern, responsive design.
+- **Real-time Notifications**: Integrates with backend Socket.io for instant admin alerts.
+
+## Real-time Notifications (Socket.io)
+
+The frontend connects to the backend via Socket.io to receive real-time notifications:
+- **Connection**: Establishes a connection to the backend API URL upon successful authentication.
+- **Admin Room Joining**: The `admin` user automatically joins a dedicated `admin-room` to receive notifications.
+- **Notification Handling**: Listens for `notification` events and displays them using `react-hot-toast` and updates the notification count/list in the header.
+- **UI Integration**: Notifications appear as toast messages and are aggregated in the notification bell dropdown in the header.
 
 ## Prerequisites
 
