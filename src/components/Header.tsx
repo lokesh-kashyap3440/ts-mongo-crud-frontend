@@ -1,7 +1,8 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../store/authSlice';
-import { markAllAsRead } from '../store/notificationSlice';
+import { markAllAsRead, clearNotifications } from '../store/notificationSlice';
+import type { Notification } from '../store/notificationSlice';
 import type { RootState } from '../store';
 import { LogOut, Users, Settings, Bell, Clock, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,6 +13,7 @@ export const Header: React.FC = () => {
   const [showNotifications, setShowNotifications] = React.useState(false);
   const [showProfileModal, setShowProfileModal] = React.useState(false);
   const user = useSelector((state: RootState) => state.auth.user);
+  const { notifications, unreadCount } = useSelector((state: RootState) => state.notification);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -89,7 +91,7 @@ export const Header: React.FC = () => {
                               No new messages
                             </div>
                           ) : (
-                            notifications.map((n) => (
+                            notifications.map((n: Notification) => (
                               <div key={n.id} className="p-4 hover:bg-gray-50 rounded-2xl transition-colors cursor-pointer group">
                                 <p className="text-sm text-gray-700 font-medium mb-1">{n.message}</p>
                                 <div className="flex items-center gap-2 text-gray-400">
