@@ -1,16 +1,17 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../store/authSlice';
-import { markAllAsRead, clearNotifications } from '../store/notificationSlice';
+import { markAllAsRead } from '../store/notificationSlice';
 import type { RootState } from '../store';
 import { LogOut, Users, Settings, Bell, Clock, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ProfileModal } from './ProfileModal';
 
 export const Header: React.FC = () => {
   const dispatch = useDispatch();
   const [showNotifications, setShowNotifications] = React.useState(false);
+  const [showProfileModal, setShowProfileModal] = React.useState(false);
   const user = useSelector((state: RootState) => state.auth.user);
-  const { notifications, unreadCount } = useSelector((state: RootState) => state.notification);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -104,7 +105,10 @@ export const Header: React.FC = () => {
                   )}
                 </AnimatePresence>
               </div>
-              <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+              <button 
+                onClick={() => setShowProfileModal(true)}
+                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
                 <Settings size={20} />
               </button>
             </div>
@@ -129,6 +133,12 @@ export const Header: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {showProfileModal && (
+          <ProfileModal onClose={() => setShowProfileModal(false)} />
+        )}
+      </AnimatePresence>
     </header>
   );
 };

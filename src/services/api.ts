@@ -27,6 +27,9 @@ export const authApi = {
   register: async (credentials: RegisterRequest): Promise<void> => {
     await apiClient.post('/auth/register', credentials);
   },
+  changePassword: async (passwords: { oldPassword: string; newPassword: string }): Promise<void> => {
+    await apiClient.put('/auth/change-password', passwords);
+  },
 };
 
 export const employeeApi = {
