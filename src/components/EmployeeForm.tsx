@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { X, Save, User, Briefcase, Building2, DollarSign } from 'lucide-react';
 import type { AppDispatch, RootState } from '../store';
-import { createEmployee, updateEmployee, clearError, clearSelectedEmployee } from '../store/employeeSlice';
+import { createEmployee, updateEmployee } from '../store/employeeSlice';
 import type { Employee } from '../types/employee';
 import toast from 'react-hot-toast';
 
