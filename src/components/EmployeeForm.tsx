@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Save, User, Briefcase, Building2, DollarSign } from 'lucide-react';
 import type { AppDispatch, RootState } from '../store';
 import { createEmployee, updateEmployee, clearError, clearSelectedEmployee } from '../store/employeeSlice';
 import type { Employee } from '../types/employee';
+import toast from 'react-hot-toast';
 
 interface EmployeeFormProps {
   employee?: Employee | null;
@@ -11,7 +14,7 @@ interface EmployeeFormProps {
 
 export function EmployeeForm({ employee, onClose }: EmployeeFormProps) {
   const dispatch = useDispatch<AppDispatch>();
-  const { loading, error } = useSelector((state: RootState) => state.employee);
+  const { loading } = useSelector((state: RootState) => state.employee);
   const isEditing = !!employee;
 
   const [formData, setFormData] = useState({
@@ -22,31 +25,15 @@ export function EmployeeForm({ employee, onClose }: EmployeeFormProps) {
   });
 
   const departments = [
-    'Engineering',
-    'Product',
-    'Data',
-    'Human Resources',
-    'Sales',
-    'Marketing',
-    'Design',
-    'Operations',
-    'Quality Assurance',
-    'Business'
+    'Engineering', 'Product', 'Data', 'Human Resources', 'Sales', 
+    'Marketing', 'Design', 'Operations', 'Quality Assurance', 'Business'
   ];
 
   const positions = [
-    'Software Engineer',
-    'Senior Software Engineer',
-    'Product Manager',
-    'Data Scientist',
-    'HR Specialist',
-    'Sales Representative',
-    'Marketing Manager',
-    'Designer',
-    'DevOps Engineer',
-    'QA Engineer',
-    'Business Analyst',
-    'Intern'
+    'Software Engineer', 'Senior Software Engineer', 'Product Manager', 
+    'Data Scientist', 'HR Specialist', 'Sales Representative', 
+    'Marketing Manager', 'Designer', 'DevOps Engineer', 'QA Engineer', 
+    'Business Analyst', 'Intern'
   ];
 
   useEffect(() => {
@@ -57,30 +44,17 @@ export function EmployeeForm({ employee, onClose }: EmployeeFormProps) {
         department: employee.department || '',
         salary: employee.salary?.toString() || '',
       });
-    } else {
-      setFormData({
-        name: '',
-        position: '',
-        department: '',
-        salary: '',
-      });
     }
   }, [employee]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!formData.name.trim()) {
-      return;
-    }
+    if (!formData.name.trim()) return;
 
     const employeeData = {
       name: formData.name.trim(),
@@ -89,149 +63,127 @@ export function EmployeeForm({ employee, onClose }: EmployeeFormProps) {
       salary: formData.salary ? parseFloat(formData.salary) : undefined,
     };
 
-    if (isEditing && employee?._id) {
-      await dispatch(updateEmployee({
-        id: employee._id,
-        employee: employeeData,
-      }));
-    } else {
-      await dispatch(createEmployee(employeeData));
-    }
-
-    // Check if there was no error after the operation
-    if (!error) {
-      dispatch(clearSelectedEmployee());
+    try {
+      if (isEditing && employee?._id) {
+        await dispatch(updateEmployee({ id: employee._id, employee: employeeData })).unwrap();
+        toast.success('Employee updated!');
+      } else {
+        await dispatch(createEmployee(employeeData)).unwrap();
+        toast.success('New employee added!');
+      }
       onClose();
+    } catch (err: any) {
+      toast.error(err || 'Operation failed');
     }
-  };
-
-  const handleClose = () => {
-    dispatch(clearError());
-    dispatch(clearSelectedEmployee());
-    onClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow-xl p-8 m-4 max-w-md w-full">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">
-            {isEditing ? 'Edit Employee' : 'Add Employee'}
-          </h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"
+      />
+      
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        className="bg-white rounded-[2rem] shadow-2xl p-8 max-w-md w-full relative z-10"
+      >
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900">
+              {isEditing ? 'Edit Profile' : 'New Profile'}
+            </h2>
+            <p className="text-gray-500 text-sm mt-1">Fill in the details below.</p>
+          </div>
           <button
-            onClick={handleClose}
-            className="text-gray-500 hover:text-gray-700 text-2xl"
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
           >
-            ✕
+            <X className="text-gray-400" size={24} />
           </button>
         </div>
 
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            <div className="flex justify-between items-center">
-              <span>{error}</span>
-              <button
-                onClick={() => dispatch(clearError())}
-                className="text-red-700 hover:text-red-900"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-              Name *
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="space-y-1">
+            <label className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase ml-1">
+              <User size={12} /> Full Name
             </label>
             <input
               type="text"
-              id="name"
               name="name"
               value={formData.name}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter employee name"
+              className="w-full px-5 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all"
+              placeholder="e.g. John Doe"
             />
           </div>
 
-          <div>
-            <label htmlFor="position" className="block text-sm font-medium text-gray-700 mb-1">
-              Position
-            </label>
-            <select
-              id="position"
-              name="position"
-              value={formData.position}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-            >
-              <option value="">Select a position</option>
-              {positions.map((pos) => (
-                <option key={pos} value={pos}>
-                  {pos}
-                </option>
-              ))}
-            </select>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase ml-1">
+                <Briefcase size={12} /> Position
+              </label>
+              <select
+                name="position"
+                value={formData.position}
+                onChange={handleChange}
+                className="w-full px-5 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all appearance-none"
+              >
+                <option value="">Select...</option>
+                {positions.map(p => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase ml-1">
+                <Building2 size={12} /> Dept
+              </label>
+              <select
+                name="department"
+                value={formData.department}
+                onChange={handleChange}
+                className="w-full px-5 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all appearance-none"
+              >
+                <option value="">Select...</option>
+                {departments.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </div>
           </div>
 
-          <div>
-            <label htmlFor="department" className="block text-sm font-medium text-gray-700 mb-1">
-              Department
+          <div className="space-y-1">
+            <label className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase ml-1">
+              <DollarSign size={12} /> Annual Salary
             </label>
-            <select
-              id="department"
-              name="department"
-              value={formData.department}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-            >
-              <option value="">Select a department</option>
-              {departments.map((dept) => (
-                <option key={dept} value={dept}>
-                  {dept}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
+              <input
+                type="number"
+                name="salary"
+                value={formData.salary}
+                onChange={handleChange}
+                className="w-full pl-10 pr-5 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all"
+                placeholder="0.00"
+              />
+            </div>
           </div>
 
-          <div>
-            <label htmlFor="salary" className="block text-sm font-medium text-gray-700 mb-1">
-              Salary
-            </label>
-            <input
-              type="number"
-              id="salary"
-              name="salary"
-              value={formData.salary}
-              onChange={handleChange}
-              min="0"
-              step="0.01"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter salary"
-            />
-          </div>
-
-          <div className="flex justify-end space-x-3 pt-4">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition duration-200"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Saving...' : (isEditing ? 'Update' : 'Create')}
-            </button>
-          </div>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            type="submit"
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 transition-all disabled:opacity-50 mt-4"
+          >
+            <Save size={20} />
+            {loading ? 'Saving Changes...' : (isEditing ? 'Save Changes' : 'Create Profile')}
+          </motion.button>
         </form>
-      </div>
+      </motion.div>
     </div>
   );
 }

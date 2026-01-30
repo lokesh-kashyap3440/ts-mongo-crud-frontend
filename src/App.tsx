@@ -8,6 +8,8 @@ import { Header } from './components/Header';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import type { Employee } from './types/employee';
+import { Toaster } from 'react-hot-toast';
+import { AnimatePresence } from 'framer-motion';
 
 function AppContent() {
   const [showForm, setShowForm] = useState(false);
@@ -31,34 +33,38 @@ function AppContent() {
   };
 
   if (!isAuthenticated) {
-    if (currentPage === 'login') {
-      return (
-        <LoginPage 
-          onLoginSuccess={() => {}} 
-          onNavigateToRegister={() => setCurrentPage('register')} 
-        />
-      );
-    } else {
-      return (
-        <RegisterPage 
-          onRegisterSuccess={() => setCurrentPage('login')} 
-          onNavigateToLogin={() => setCurrentPage('login')} 
-        />
-      );
-    }
+    return (
+      <div className="bg-[#f8faff] min-h-screen">
+        <Toaster position="top-right" />
+        {currentPage === 'login' ? (
+          <LoginPage 
+            onLoginSuccess={() => {}} 
+            onNavigateToRegister={() => setCurrentPage('register')} 
+          />
+        ) : (
+          <RegisterPage 
+            onRegisterSuccess={() => setCurrentPage('login')} 
+            onNavigateToLogin={() => setCurrentPage('login')} 
+          />
+        )}
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-[#f8faff] pb-20">
+      <Toaster position="top-right" />
       <Header />
       <main>
         <EmployeeList onEdit={handleEdit} onAdd={handleAdd} />
-        {showForm && (
-          <EmployeeForm
-            employee={editingEmployee}
-            onClose={handleCloseForm}
-          />
-        )}
+        <AnimatePresence>
+          {showForm && (
+            <EmployeeForm
+              employee={editingEmployee}
+              onClose={handleCloseForm}
+            />
+          )}
+        </AnimatePresence>
       </main>
     </div>
   );
