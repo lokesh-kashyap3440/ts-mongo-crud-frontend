@@ -26,17 +26,10 @@ function AppContent() {
       const socket = io(API_BASE_URL);
 
       socket.on('connect', () => {
-        // If user is admin, join admin room
-        // Note: For simplicity, we check username 'admin' or you can use the role from state
-        // If you don't have role in auth state, we can assume 'admin' username for now 
-        // or check the actual role if you stored it.
-        const token = localStorage.getItem('token');
-        if (token) {
-            // Decode role from token or use state.
-            // Let's check the username 'admin' as a simple flag
-            if (user === 'admin') {
-                socket.emit('join-admin');
-            }
+        console.log('🔌 Connected to Socket.io');
+        if (user === 'admin') {
+          console.log('👑 Joining admin room...');
+          socket.emit('join-admin');
         }
       });
 
