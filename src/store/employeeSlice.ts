@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/tool
 import type { Employee, CreateEmployeeRequest, UpdateEmployeeRequest } from '../types/employee';
 import { employeeApi } from '../services/api';
 
-interface EmployeeState {
+export interface EmployeeState {
   employees: Employee[];
   selectedEmployee: Employee | null;
   loading: boolean;

@@ -1,9 +1,6 @@
 import employeeReducer, {
   fetchEmployees,
   createEmployee,
-  updateEmployee,
-  deleteEmployee,
-  fetchEmployeeById,
 } from '../employeeSlice';
 import { configureStore } from '@reduxjs/toolkit';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
