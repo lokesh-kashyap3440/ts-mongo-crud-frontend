@@ -1,16 +1,26 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../store/authSlice';
+import { markAllAsRead } from '../store/notificationSlice';
 import type { RootState } from '../store';
-import { LogOut, Users, Settings, Bell } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { LogOut, Users, Settings, Bell, Clock } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export const Header: React.FC = () => {
   const dispatch = useDispatch();
+  const [showNotifications, setShowNotifications] = React.useState(false);
   const user = useSelector((state: RootState) => state.auth.user);
+  const { notifications, unreadCount } = useSelector((state: RootState) => state.notification);
 
   const handleLogout = () => {
     dispatch(logout());
+  };
+
+  const toggleNotifications = () => {
+    if (!showNotifications && unreadCount > 0) {
+      dispatch(markAllAsRead());
+    }
+    setShowNotifications(!showNotifications);
   };
 
   return (
@@ -28,9 +38,59 @@ export const Header: React.FC = () => {
 
           <div className="flex items-center gap-6">
             <div className="hidden md:flex items-center gap-4">
-              <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                <Bell size={20} />
-              </button>
+              <div className="relative">
+                <button 
+                  onClick={toggleNotifications}
+                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors relative"
+                >
+                  <Bell size={20} />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1.5 right-1.5 block h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white" />
+                  )}
+                </button>
+
+                <AnimatePresence>
+                  {showNotifications && (
+                    <>
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setShowNotifications(false)}
+                        className="fixed inset-0 z-10"
+                      />
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        className="absolute right-0 mt-2 w-80 bg-white rounded-3xl shadow-2xl border border-gray-100 py-4 z-20"
+                      >
+                        <div className="px-6 py-2 border-b border-gray-50 flex justify-between items-center mb-2">
+                          <h3 className="font-black text-gray-900 text-sm">Notifications</h3>
+                          <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded-full font-bold uppercase">Recent</span>
+                        </div>
+                        <div className="max-h-[400px] overflow-y-auto px-2">
+                          {notifications.length === 0 ? (
+                            <div className="py-10 text-center text-gray-400 text-sm italic">
+                              No new messages
+                            </div>
+                          ) : (
+                            notifications.map((n) => (
+                              <div key={n.id} className="p-4 hover:bg-gray-50 rounded-2xl transition-colors cursor-pointer group">
+                                <p className="text-sm text-gray-700 font-medium mb-1">{n.message}</p>
+                                <div className="flex items-center gap-2 text-gray-400">
+                                  <Clock size={10} />
+                                  <span className="text-[10px] font-bold uppercase">{new Date(n.timestamp).toLocaleTimeString()}</span>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
+              </div>
               <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
                 <Settings size={20} />
               </button>
