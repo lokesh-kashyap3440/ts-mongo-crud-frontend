@@ -1,4 +1,5 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
 export interface Notification {
   id: string;
@@ -9,7 +10,7 @@ export interface Notification {
   isRead: boolean;
 }
 
-interface NotificationState {
+export interface NotificationState {
   notifications: Notification[];
   unreadCount: number;
 }
