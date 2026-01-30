@@ -1,9 +1,9 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../store/authSlice';
-import { markAllAsRead } from '../store/notificationSlice';
+import { markAllAsRead, clearNotifications } from '../store/notificationSlice';
 import type { RootState } from '../store';
-import { LogOut, Users, Settings, Bell, Clock } from 'lucide-react';
+import { LogOut, Users, Settings, Bell, Clock, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const Header: React.FC = () => {
@@ -14,6 +14,11 @@ export const Header: React.FC = () => {
 
   const handleLogout = () => {
     dispatch(logout());
+  };
+
+  const handleClearNotifications = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    dispatch(clearNotifications());
   };
 
   const toggleNotifications = () => {
@@ -67,7 +72,15 @@ export const Header: React.FC = () => {
                       >
                         <div className="px-6 py-2 border-b border-gray-50 flex justify-between items-center mb-2">
                           <h3 className="font-black text-gray-900 text-sm">Notifications</h3>
-                          <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded-full font-bold uppercase">Recent</span>
+                          {notifications.length > 0 && (
+                            <button 
+                              onClick={handleClearNotifications}
+                              className="flex items-center gap-1 text-[10px] text-red-500 hover:text-red-700 font-bold uppercase transition-colors"
+                            >
+                              <Trash2 size={10} />
+                              Clear All
+                            </button>
+                          )}
                         </div>
                         <div className="max-h-[400px] overflow-y-auto px-2">
                           {notifications.length === 0 ? (

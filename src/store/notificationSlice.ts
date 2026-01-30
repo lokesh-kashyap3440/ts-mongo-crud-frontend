@@ -39,7 +39,7 @@ const notificationSlice = createSlice({
     },
     clearNotifications: (state) => {
       state.notifications = [];
-      unreadCount: 0;
+      state.unreadCount = 0;
     },
   },
 });
